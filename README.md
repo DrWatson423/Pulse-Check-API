@@ -17,13 +17,13 @@ This is a switch API built with Node.js and Express. A remote device can registe
                            ▼
                     ┌─────────────┐
               ┌────▶│   ACTIVE    │◀────────────────────────────┐
-              │     └──────┬──────┘                             │
+              │     └──────┬──────┘                              │
               │            │                                     │
               │     timer expires?                      POST /:id/heartbeat
               │            │                            (un-pauses + resets)
               │            ▼                                     │
-              │     ┌─────────────┐                     ┌───────┴─────┐
-              │     │    DOWN     │                     │   PAUSED    │
+              │     ┌─────────────┐                     ┌─────── ┴─────┐
+              │     │    DOWN     │                     │   PAUSED     │
               │     │  (alert!)   │          POST /:id/pause           │
               │     └─────────────┘          └─────────────────────────┘
               │
