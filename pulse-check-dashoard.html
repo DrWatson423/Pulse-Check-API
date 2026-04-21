@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pulse Check API </title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060a10;
+    --surface: #0d1420;
+    --surface2: #111c2d;
+    
+    --accent: #00ff22;
+    --accent2: #ff6b35;
+    --green: #00ff88;
+    --red: #ff3b5c;
+    --yellow: #ffd93d;
+    --text: #e8f4f8;
+    --muted: #4a6b80;
+    --mono: 'Space Mono', monospace;
+    --sans: sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Glow orbs */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px; left: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 48px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .logo-area h1 {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+
+  .logo-area h1 span { color: var(--text); }
+
+  .logo-area p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+    font-family: var(--mono);
+  }
+
+  .server-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse-dot 2s infinite;
+  }
+
+  .status-dot.offline { background: var(--red); box-shadow: 0 0 8px var(--red); animation: none; }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Base URL bar */
+  .base-url-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .base-url-bar label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .base-url-bar input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--accent);
+  }
+
+  /* Section label */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Request cards */
+  .request-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  @media (max-width: 640px) { .request-grid { grid-template-columns: 1fr; } }
+
+  .req-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .req-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+
+  .req-card.full-width { grid-column: 1 / -1; }
+
+  .req-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .method-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  .method-badge.POST { background: rgba(0,255,136,0.15); color: var(--green); border: 1px solid rgba(0,255,136,0.3); }
+  .method-badge.GET  { background: rgba(0,229,255,0.15); color: var(--accent); border: 1px solid rgba(0,229,255,0.3); }
+
+  .req-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .req-endpoint {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .req-body {
+    padding: 16px;
+  }
+
+  .field-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+
+  .field-row label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .field-row input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 8px 10px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  .field-row input:focus { border-color: var(--accent); }
+
+  .send-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .send-btn:hover { background: var(--accent); color: var(--bg); }
+  .send-btn:active { transform: scale(0.98); }
+
+  .send-btn.danger { border-color: var(--accent2); color: var(--accent2); }
+  .send-btn.danger:hover { background: var(--accent2); color: var(--bg); }
+
+  /* Response log */
+  .log-area {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .log-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .log-header span {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .clear-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .clear-btn:hover { border-color: var(--red); color: var(--red); }
+
+  .log-entries {
+    padding: 16px;
+    max-height: 400px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .log-entries::-webkit-scrollbar { width: 4px; }
+  .log-entries::-webkit-scrollbar-track { background: transparent; }
+  .log-entries::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .log-entry {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    animation: slide-in 0.3s ease;
+  }
+
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .log-entry.success { border-color: rgba(0,255,136,0.3); }
+  .log-entry.error   { border-color: rgba(255,59,92,0.3); }
+
+  .log-entry-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .status-code {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .status-code.ok  { background: rgba(0,255,136,0.15); color: var(--green); }
+  .status-code.err { background: rgba(255,59,92,0.15); color: var(--red); }
+
+  .log-route {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    flex: 1;
+  }
+
+  .log-time {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  .log-body {
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--accent);
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .log-body.error { color: var(--red); }
+
+  .empty-log {
+    text-align: center;
+    padding: 40px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .empty-log .icon { font-size: 32px; margin-bottom: 12px; display: block; }
+
+  /* Monitor list */
+  .monitors-section { margin-top: 32px; }
+
+  .monitor-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .monitor-id { color: var(--accent); font-weight: 700; flex: 1; }
+
+  .monitor-badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .monitor-badge.active  { background: rgba(0,255,136,0.15); color: var(--green);  border: 1px solid rgba(0,255,136,0.3); }
+  .monitor-badge.paused  { background: rgba(255,217,61,0.15); color: var(--yellow); border: 1px solid rgba(255,217,61,0.3); }
+  .monitor-badge.down    { background: rgba(255,59,92,0.15);  color: var(--red);    border: 1px solid rgba(255,59,92,0.3);  }
+
+  .monitor-timeout { color: var(--muted); }
+
+  .empty-monitors {
+    text-align: center;
+    padding: 30px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+  }
+
+  /* Timer bar */
+  .timer-bar-wrap {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+
+  .timer-bar {
+    height: 100%;
+    background: var(--green);
+    border-radius: 2px;
+    transition: width 1s linear, background 0.3s;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo-area">
+      <h1>Pulse<span> </span>Check</h1>
+      <p>Dead Man's Switch</p>
+    </div>
+    <div class="server-status">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">checking server...</span>
+    </div>
+  </header>
+
+  <div class="base-url-bar">
+    <label>Base URL</label>
+    <input type="text" id="baseUrl" value="http://localhost:3000" />
+  </div>
+
+  <!-- REGISTER -->
+  <div class="section-label">Register a Monitor</div>
+  <div style="margin-bottom:32px;">
+    <div class="req-card">
+      <div class="req-header">
+        <span class="method-badge POST">POST</span>
+        <span class="req-title">Register Monitor</span>
+        <span class="req-endpoint">/monitors</span>
+      </div>
+      <div class="req-body">
+        <div class="field-row">
+          <label>Device ID</label>
+          <input type="text" id="reg-id" value="device-123" />
+        </div>
+        <div class="field-row">
+          <label>Timeout (seconds)</label>
+          <input type="number" id="reg-timeout" value="30" />
+        </div>
+        <div class="field-row">
+          <label>Alert Email</label>
+          <input type="text" id="reg-email" value="admin@critmon.com" />
+        </div>
+        <button class="send-btn" onclick="registerMonitor()">▶ Send Request</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEARTBEAT + PAUSE -->
+  <div class="section-label">Manage Monitor</div>
+  <div class="request-grid" style="margin-bottom:32px;">
+    <div class="req-card">
+      <div class="req-header">
+        <span class="method-badge POST">POST</span>
+        <span class="req-title">Heartbeat</span>
+        <span class="req-endpoint">/:id/heartbeat</span>
+      </div>
+      <div class="req-body">
+        <div class="field-row">
+          <label>Device ID</label>
+          <input type="text" id="hb-id" value="device-123" />
+        </div>
+        <button class="send-btn" onclick="heartbeat()">▶ Send Heartbeat</button>
+      </div>
+    </div>
+
+    <div class="req-card">
+      <div class="req-header">
+        <span class="method-badge POST">POST</span>
+        <span class="req-title">Pause Monitor</span>
+        <span class="req-endpoint">/:id/pause</span>
+      </div>
+      <div class="req-body">
+        <div class="field-row">
+          <label>Device ID</label>
+          <input type="text" id="pause-id" value="device-123" />
+        </div>
+        <button class="send-btn danger" onclick="pauseMonitor()">⏸ Pause Monitor</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GET + LIST -->
+  <div class="section-label">Inspect Monitors</div>
+  <div class="request-grid" style="margin-bottom:40px;">
+    <div class="req-card">
+      <div class="req-header">
+        <span class="method-badge GET">GET</span>
+        <span class="req-title">Get Monitor</span>
+        <span class="req-endpoint">/:id</span>
+      </div>
+      <div class="req-body">
+        <div class="field-row">
+          <label>Device ID</label>
+          <input type="text" id="get-id" value="device-123" />
+        </div>
+        <button class="send-btn" onclick="getMonitor()">▶ Fetch Status</button>
+      </div>
+    </div>
+
+    <div class="req-card">
+      <div class="req-header">
+        <span class="method-badge GET">GET</span>
+        <span class="req-title">List All Monitors</span>
+        <span class="req-endpoint">/monitors</span>
+      </div>
+      <div class="req-body" style="padding-top:28px;"> 
+        <button class="send-btn" onclick="listMonitors()">▶ List All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESPONSE LOG -->
+  <div class="section-label">Response Log</div>
+  <div class="log-area" style="margin-bottom:40px;">
+    <div class="log-header">
+      <span>Live Responses</span>
+      <button class="clear-btn" onclick="clearLog()">Clear</button>
+    </div>
+    <div class="log-entries" id="logEntries">
+      <div class="empty-log">
+        <span class="icon"></span>
+        No requests yet — send one above to see the response here
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE MONITORS -->
+  <div class="section-label">Live Monitor Status</div>
+  <div id="monitorsDisplay">
+    <div class="empty-monitors">No monitors registered yet</div>
+  </div>
+
+</div>
+
+<script>
+  const base = () => document.getElementById('baseUrl').value.replace(/\/$/, '');
+
+  // ── Check server on load ──────────────────────────────────────────────────
+  async function checkServer() {
+    try {
+      const r = await fetch(base() + '/');
+      const dot = document.getElementById('statusDot');
+      const txt = document.getElementById('statusText');
+      if (r.ok) {
+        dot.className = 'status-dot';
+        txt.textContent = 'server online';
+      } else {
+        dot.className = 'status-dot offline';
+        txt.textContent = 'server error';
+      }
+    } catch {
+      document.getElementById('statusDot').className = 'status-dot offline';
+      document.getElementById('statusText').textContent = 'server offline — run npm start';
+    }
+  }
+
+  checkServer();
+  setInterval(checkServer, 5000);
+
+  // ── API helpers 
+  async function call(method, path, body) {
+    const url = base() + path;
+    const opts = {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+    };
+    if (body) opts.body = JSON.stringify(body);
+
+    const label = `${method} ${path}`;
+    try {
+      const r = await fetch(url, opts);
+      const data = await r.json();
+      logResponse(r.status, label, data, r.ok);
+      return data;
+    } catch (e) {
+      logResponse(0, label, { error: 'Could not reach server. Is npm start running?' }, false);
+    }
+  }
+
+  // ── Log ───────────────────────────────────────────────────────────────────
+  function logResponse(status, route, data, ok) {
+    const container = document.getElementById('logEntries');
+
+    // Remove empty state
+    const empty = container.querySelector('.empty-log');
+    if (empty) empty.remove();
+
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${ok ? 'success' : 'error'}`;
+
+    const now = new Date().toLocaleTimeString();
+    entry.innerHTML = `
+      <div class="log-entry-header">
+        <span class="status-code ${ok ? 'ok' : 'err'}">${status || 'ERR'}</span>
+        <span class="log-route">${route}</span>
+        <span class="log-time">${now}</span>
+      </div>
+      <div class="log-body ${ok ? '' : 'error'}">${JSON.stringify(data, null, 2)}</div>
+    `;
+
+    container.insertBefore(entry, container.firstChild);
+    refreshMonitors();
+  }
+
+  function clearLog() {
+    document.getElementById('logEntries').innerHTML =
+      '<div class="empty-log"><span class="icon">📡</span>Log cleared — send a request to see responses</div>';
+  }
+
+  // ── API calls 
+  async function registerMonitor() {
+    const id      = document.getElementById('reg-id').value;
+    const timeout = parseInt(document.getElementById('reg-timeout').value);
+    const email   = document.getElementById('reg-email').value;
+    // sync all ID fields
+    syncIds(id);
+    await call('POST', '/monitors', { id, timeout, alert_email: email });
+  }
+
+  async function heartbeat() {
+    const id = document.getElementById('hb-id').value;
+    await call('POST', `/monitors/${id}/heartbeat`);
+  }
+
+  async function pauseMonitor() {
+    const id = document.getElementById('pause-id').value;
+    await call('POST', `/monitors/${id}/pause`);
+  }
+
+  async function getMonitor() {
+    const id = document.getElementById('get-id').value;
+    await call('GET', `/monitors/${id}`);
+  }
+
+  async function listMonitors() {
+    await call('GET', '/monitors');
+  }
+
+  function syncIds(id) {
+    ['hb-id','pause-id','get-id'].forEach(f => document.getElementById(f).value = id);
+  }
+
+  // ── Live monitor display ──────────────────────────────────────────────────
+  async function refreshMonitors() {
+    try {
+      const r = await fetch(base() + '/monitors');
+      if (!r.ok) return;
+      const monitors = await r.json();
+      const el = document.getElementById('monitorsDisplay');
+
+      if (!monitors.length) {
+        el.innerHTML = '<div class="empty-monitors">No monitors registered yet</div>';
+        return;
+      }
+
+      el.innerHTML = monitors.map(m => {
+        const pct = 100; // just show full bar on refresh
+        return `
+          <div class="monitor-card">
+            <span class="monitor-id">${m.id}</span>
+            <span class="monitor-timeout">⏱ ${m.timeout}s</span>
+            <span class="monitor-badge ${m.status}">${m.status}</span>
+          </div>
+        `;
+      }).join('');
+    } catch {}
+  }
+
+  refreshMonitors();
+  setInterval(refreshMonitors, 3000);
+</script>
+</body>
+</html>

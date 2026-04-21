@@ -209,7 +209,7 @@ curl http://localhost:3000/monitors/device-123
 
 ---
 
-### `GET /monitors` *(Developer's Choice)*
+### `GET /monitors` and dashboard *(Developer's Choice)*
 List all registered monitors (all statuses).
 
 **Example**
@@ -250,7 +250,8 @@ The monitor's status changes to `"down"` and the timer stops. To resume monitori
 
 ## Developer's Choice — Status Inspection Endpoints
 
-**Added:** `GET /monitors/:id` and `GET /monitors`
+**Added:** `GET /monitors/:id` and `GET /monitors` and a dashboard so end users can easily test the switch
+
 
 **Why?**
 
@@ -260,7 +261,8 @@ The core spec defines write operations (register, heartbeat, pause) but provides
 - Check whether a device is currently `active`, `paused`, or `down` without waiting for an alert
 - Build a simple dashboard or health-check script that polls device states
 
-These two read endpoints close that gap with zero added complexity. They're read-only, stateless, and expose no sensitive internals (the internal `timerId` handle is stripped before returning). Any support engineer or ops dashboard can `GET /monitors` to get a full picture of the fleet in one request.
+
+These two read endpoints and the dasboard close that gap with zero added complexity. Any support engineer or ops dashboard can `GET /monitors` and check live server to get a full picture of the fleet in one request.
 
 ---
 
