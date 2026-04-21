@@ -4,7 +4,7 @@ This is a switch API built with Node.js and Express. A remote device can registe
 
 ## Architecture Diagram
 
-### State Machine — Monitor Lifecycle
+### Monitor 
 
 ```
                      POST /monitors
@@ -30,7 +30,7 @@ This is a switch API built with Node.js and Express. A remote device can registe
               └──── POST /:id/heartbeat (timer reset → stays ACTIVE)
 ```
 
-### Sequence Diagram — Happy Path
+### Sequence Diagram
 
 ```
 Device          API Server          Timer Engine
@@ -76,7 +76,7 @@ npm install
 
 # Start the server
 npm start
-# → 🚀 Pulse-Check API running on http://localhost:3000
+# → Pulse-Check API running on http://localhost:3000
 
 # Development mode (auto-restart on file changes)
 npm run dev

@@ -143,17 +143,17 @@ function pauseMonitor(id) {
 }
 
 /**
- * Get the current status of a monitor (Developer's Choice feature).
- * @param {string} id
- * @returns {Monitor|null}
+ Get the current status of a monitor (Developer's Choice feature).
+ @param {string} id
+ @returns {Monitor|null}
  */
 function getMonitor(id) {
   return monitors.get(id) || null;
 }
 
 /**
- * List all monitors (useful for admin dashboards).
- * @returns {Monitor[]}
+ List all monitors (useful for admin dashboards).
+ @returns {Monitor[]}
  */
 function listMonitors() {
   return Array.from(monitors.values()).map(sanitize);
