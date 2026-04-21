@@ -1,7 +1,7 @@
 
 // Entry point for Pulse Check
 const express = require('express')
-const monitorRouter = require('.routes/monitors')
+const monitorsRouter = require('./routes/monitors')
 
 const app = express()
 const PORT = process.env.PORT || 3000
