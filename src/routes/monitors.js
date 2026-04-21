@@ -1,16 +1,16 @@
-/**
- * routes/monitors.js
- * All /monitors route handlers.
+/*
+routes/monitors.js
+All /monitors route handlers.
  */
 
 const express = require('express');
 const router = express.Router();
 const store = require('../monitors');
 
-// ──────────────────────────────────────────────────────────────────────────────
+
 // POST /monitors
 // Register a new monitor
-// ──────────────────────────────────────────────────────────────────────────────
+
 router.post('/', (req, res) => {
   const { id, timeout, alert_email } = req.body;
 
@@ -34,10 +34,10 @@ router.post('/', (req, res) => {
   return res.status(201).json({ message: result.message });
 });
 
-// ──────────────────────────────────────────────────────────────────────────────
+
 // POST /monitors/:id/heartbeat
 // Reset the countdown for a monitor
-// ──────────────────────────────────────────────────────────────────────────────
+
 router.post('/:id/heartbeat', (req, res) => {
   const { id } = req.params;
   const result = store.heartbeat(id);
@@ -50,10 +50,10 @@ router.post('/:id/heartbeat', (req, res) => {
   return res.status(200).json({ message: result.message, status: result.status });
 });
 
-// ──────────────────────────────────────────────────────────────────────────────
+
 // POST /monitors/:id/pause
 // Pause a monitor (Bonus: Snooze Button)
-// ──────────────────────────────────────────────────────────────────────────────
+
 router.post('/:id/pause', (req, res) => {
   const { id } = req.params;
   const result = store.pauseMonitor(id);
@@ -66,10 +66,10 @@ router.post('/:id/pause', (req, res) => {
   return res.status(200).json({ message: result.message });
 });
 
-// ──────────────────────────────────────────────────────────────────────────────
+
 // GET /monitors/:id  (Developer's Choice)
 // Retrieve the current state of a monitor
-// ──────────────────────────────────────────────────────────────────────────────
+
 router.get('/:id', (req, res) => {
   const { id } = req.params;
   const monitor = store.getMonitor(id);
@@ -81,10 +81,12 @@ router.get('/:id', (req, res) => {
   return res.status(200).json(store.sanitize(monitor));
 });
 
-// ──────────────────────────────────────────────────────────────────────────────
+
+
+
 // GET /monitors  (Developer's Choice)
 // List all monitors
-// ──────────────────────────────────────────────────────────────────────────────
+
 router.get('/', (req, res) => {
   return res.status(200).json(store.listMonitors());
 });

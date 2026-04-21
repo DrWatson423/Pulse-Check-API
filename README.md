@@ -236,7 +236,7 @@ curl http://localhost:3000/monitors
 When a monitor's countdown reaches zero with no heartbeat, the system fires to the server console:
 
 ```
-🚨 CRITICAL ALERT 🚨
+ CRITICAL ALERT !!!!!
 {
   "ALERT": "Device device-123 is down!",
   "alert_email": "admin@critmon.com",

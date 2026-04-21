@@ -34,7 +34,7 @@ function fireAlert(id) {
     time: new Date().toISOString(),
   };
 
-  console.error('\n🚨 CRITICAL ALERT 🚨');
+  console.error('\nCRITICAL ALERT!!!!!!!!');
   console.error(JSON.stringify(alert, null, 2));
   console.error('--------------------\n');
 }
@@ -52,16 +52,16 @@ function clearTimer(monitor) {
 
 /**
  * Start (or restart) the countdown timer for a monitor.
- * @param {Monitor} monitor
+  @param {Monitor} monitor
  */
 function startTimer(monitor) {
   clearTimer(monitor);
   monitor.timerId = setTimeout(() => fireAlert(monitor.id), monitor.timeout * 1000);
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
+
 // Public API
-// ──────────────────────────────────────────────────────────────────────────────
+
 
 /**
  * Register a new monitor.

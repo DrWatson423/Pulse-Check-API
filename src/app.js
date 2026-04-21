@@ -50,7 +50,7 @@ app.use((err, _req, res, _next) => {
  
 // ── Start ─────────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`\n🚀 Pulse-Check API running on http://localhost:${PORT}`);
+  console.log(`\n Pulse-Check API running on http://localhost:${PORT}`);
   console.log('   Press Ctrl+C to stop.\n');
 });
  
