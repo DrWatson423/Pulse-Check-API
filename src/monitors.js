@@ -1,26 +1,15 @@
-/**
- * monitors.js
- * In-memory store and timer management for all device monitors.
+/*
+In-memory store and timer management for all device monitors.
  */
 
 // Map of monitorId -> monitor object
 const monitors = new Map();
 
-/**
- * @typedef {Object} Monitor
- * @property {string}  id           - Unique device identifier
- * @property {number}  timeout      - Countdown duration in seconds
- * @property {string}  alert_email  - Email to alert on failure
- * @property {'active'|'paused'|'down'} status
- * @property {number}  createdAt    - Unix ms timestamp
- * @property {number}  lastPing     - Unix ms timestamp of last heartbeat
- * @property {NodeJS.Timeout|null} timerId - Active timer handle
- */
 
-/**
- * Fire the alert for a timed-out monitor.
- * @param {string} id
- */
+
+
+ // Fire the alert for a timed-out monitor.
+ 
 function fireAlert(id) {
   const monitor = monitors.get(id);
   if (!monitor) return;
@@ -39,10 +28,9 @@ function fireAlert(id) {
   console.error('--------------------\n');
 }
 
-/**
- * Clear any running timer for a monitor.
- * @param {Monitor} monitor
- */
+
+//  Clear any running timer for a monitor.
+
 function clearTimer(monitor) {
   if (monitor.timerId) {
     clearTimeout(monitor.timerId);
@@ -50,10 +38,9 @@ function clearTimer(monitor) {
   }
 }
 
-/**
- * Start (or restart) the countdown timer for a monitor.
-  @param {Monitor} monitor
- */
+
+ //Start (or restart) the countdown timer for a monitor.
+ 
 function startTimer(monitor) {
   clearTimer(monitor);
   monitor.timerId = setTimeout(() => fireAlert(monitor.id), monitor.timeout * 1000);
@@ -63,19 +50,15 @@ function startTimer(monitor) {
 // Public API
 
 
-/**
- * Register a new monitor.
- * @param {string} id
- * @param {number} timeout  - seconds
- * @param {string} alert_email
- * @returns {{ success: boolean, message: string }}
+/*Register a new monitor.
+@returns {{ success: boolean, message: string }}
  */
 function registerMonitor(id, timeout, alert_email) {
   if (monitors.has(id)) {
     return { success: false, message: `Monitor with id '${id}' already exists.` };
   }
 
-  /** @type {Monitor} */
+  /* @type {Monitor} */
   const monitor = {
     id,
     timeout,
@@ -92,10 +75,9 @@ function registerMonitor(id, timeout, alert_email) {
   return { success: true, message: `Monitor '${id}' registered. Countdown started (${timeout}s).` };
 }
 
-/**
- * Reset the heartbeat timer for a monitor.
- * @param {string} id
- * @returns {{ success: boolean, message: string, status?: string }}
+/*
+Reset the heartbeat timer for a monitor.
+ @returns {{ success: boolean, message: string, status?: string }}
  */
 function heartbeat(id) {
   const monitor = monitors.get(id);
@@ -116,10 +98,10 @@ function heartbeat(id) {
   return { success: true, message: `Heartbeat received. Timer reset to ${monitor.timeout}s.`, status: monitor.status };
 }
 
-/**
- * Pause a monitor (stops the timer; no alert will fire).
- * @param {string} id
- * @returns {{ success: boolean, message: string }}
+/*
+ Pause a monitor (stops the timer; no alert will fire).
+ 
+ @returns {{ success: boolean, message: string }}
  */
 function pauseMonitor(id) {
   const monitor = monitors.get(id);
@@ -142,16 +124,16 @@ function pauseMonitor(id) {
   return { success: true, message: `Monitor '${id}' paused. No alerts will fire until the next heartbeat.` };
 }
 
-/**
+/*
  Get the current status of a monitor (Developer's Choice feature).
- @param {string} id
+
  @returns {Monitor|null}
  */
 function getMonitor(id) {
   return monitors.get(id) || null;
 }
 
-/**
+/*
  List all monitors (useful for admin dashboards).
  @returns {Monitor[]}
  */
@@ -159,7 +141,7 @@ function listMonitors() {
   return Array.from(monitors.values()).map(sanitize);
 }
 
-/**
+/*
  * Return a safe copy of a monitor (no internal timer handle).
  * @param {Monitor} monitor
  */
